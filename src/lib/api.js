@@ -122,6 +122,20 @@ export const localApi = {
     return Object.values(participants);
   },
 
+  async removeParticipant(roomCode, participantId) {
+    const key = `${STORAGE_KEY}-participants-${roomCode}`;
+    const participants = JSON.parse(localStorage.getItem(key) || '{}');
+    delete participants[participantId];
+    localStorage.setItem(key, JSON.stringify(participants));
+    const currentKey = `${STORAGE_KEY}-current-${roomCode}`;
+    try {
+      const current = JSON.parse(localStorage.getItem(currentKey) || 'null');
+      if (current?.id === participantId) {
+        localStorage.removeItem(currentKey);
+      }
+    } catch {}
+  },
+
   async setResult(categoryId, winnerId) {
     const results = getLocalResults();
     results[categoryId] = {
@@ -242,6 +256,17 @@ export const supabaseApi = {
       ballot: p.ballot || {},
       joinedAt: p.joined_at,
     }));
+  },
+
+  async removeParticipant(roomCode, participantId) {
+    const room = await this.getRoom(roomCode);
+    if (!room) return;
+    const { error } = await supabase
+      .from('participants')
+      .delete()
+      .eq('id', participantId)
+      .eq('room_id', room.id);
+    if (error) throw error;
   },
 
   async subscribeParticipants(roomCode, callback) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { api, CATEGORIES } from '../lib/api';
+import { api, CATEGORIES, getCurrentParticipant } from '../lib/api';
+import { RemoveIcon } from '../components/Icons';
 
 function calculateScore(ballot, results) {
   let score = 0;
@@ -33,6 +34,28 @@ export default function Leaderboard() {
   const [participants, setParticipants] = useState([]);
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState(true);
+  const [removing, setRemoving] = useState(null);
+  const [confirmRemove, setConfirmRemove] = useState(null);
+
+  async function handleRemove(p) {
+    if (!api.removeParticipant) return;
+    setConfirmRemove(p);
+  }
+
+  async function confirmRemoveParticipant() {
+    if (!confirmRemove || !api.removeParticipant) return;
+    const p = confirmRemove;
+    setConfirmRemove(null);
+    setRemoving(p.id);
+    try {
+      await api.removeParticipant(code, p.id);
+      await load();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRemoving(null);
+    }
+  }
 
   async function load() {
     if (isPreview) {
@@ -112,6 +135,9 @@ export default function Leaderboard() {
     return [...acc, { ...p, rank }];
   }, []);
 
+  const currentParticipant = getCurrentParticipant(code);
+  const canRemove = (p) => currentParticipant?.id !== p.id;
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <main className="flex-1 min-h-0 overflow-y-auto px-6 py-6 pb-20 max-w-lg mx-auto w-full">
@@ -142,6 +168,17 @@ export default function Leaderboard() {
               <span className="font-bold text-lg tabular-nums text-[var(--card-text-dark)]">
                 {p.score}
               </span>
+              {!isPreview && api.removeParticipant && canRemove(p) && (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(p)}
+                  disabled={removing === p.id}
+                  className="p-2 rounded-lg text-[var(--card-text-muted)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 transition-colors disabled:opacity-50 shrink-0"
+                  aria-label={`Remove ${p.displayName}`}
+                >
+                  <RemoveIcon className="w-4 h-4" />
+                </button>
+              )}
             </li>
           ))}
         </ol>
@@ -152,6 +189,40 @@ export default function Leaderboard() {
           </p>
         )}
       </main>
+
+      {confirmRemove && (
+        <div
+          className="fixed inset-0 z-30 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-remove-title"
+        >
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+            <h3 id="confirm-remove-title" className="text-lg font-bold text-[var(--card-text-dark)] mb-2">
+              Remove from leaderboard?
+            </h3>
+            <p className="text-[var(--card-text-muted)] text-sm mb-6">
+              Remove <strong className="text-[var(--card-text-dark)]">{confirmRemove.displayName}</strong> from the leaderboard? This cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setConfirmRemove(null)}
+                className="px-4 py-2.5 rounded-xl text-[var(--card-text-dark)] font-medium hover:bg-[var(--card-divider)]/30 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmRemoveParticipant}
+                className="px-4 py-2.5 rounded-xl bg-[var(--error)] text-white font-semibold hover:opacity-90 transition-opacity"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
