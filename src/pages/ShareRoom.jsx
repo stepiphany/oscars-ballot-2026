@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { LinkIcon, CheckIcon } from '../components/Icons';
 
 const BG_STYLE = {
@@ -11,9 +11,8 @@ const BG_STYLE = {
 
 export default function ShareRoom() {
   const { code } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
-  const { room, participant } = location.state || {};
+  const { room } = location.state || {};
 
   const [copied, setCopied] = useState(false);
 
@@ -35,22 +34,6 @@ export default function ShareRoom() {
       document.body.removeChild(input);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }
-  }
-
-  function handleContinueToBallot() {
-    if (room && participant) {
-      navigate(`/r/${code}/ballot`, { state: { room, participant } });
-    } else {
-      navigate(`/r/${code}/ballot`);
-    }
-  }
-
-  function handleContinueToOnboard() {
-    if (room && participant) {
-      navigate(`/r/${code}/onboard`, { state: { room, participant } });
-    } else {
-      navigate(`/r/${code}/onboard`);
     }
   }
 
@@ -96,7 +79,7 @@ export default function ShareRoom() {
               />
               <button
                 onClick={handleCopy}
-                className="shrink-0 p-3 bg-[var(--btn-bg)] text-white rounded-xl hover:bg-[var(--btn-hover)] transition-colors"
+                className="shrink-0 p-3 bg-white border-2 border-[var(--accent-on-light)] text-[var(--accent-on-light)] rounded-xl hover:bg-[var(--accent-on-light)]/10 transition-colors"
                 id="copy-status"
                 aria-label={copied ? 'Copied' : 'Copy link'}
               >
@@ -106,18 +89,12 @@ export default function ShareRoom() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={handleContinueToOnboard}
-              className="w-full py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] transition-colors"
+            <Link
+              to={`/r/${code}`}
+              className="w-full py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] transition-colors text-center block"
             >
-              Make picks (swipe through categories)
-            </button>
-            <button
-              onClick={handleContinueToBallot}
-              className="w-full py-3 px-6 bg-white border-2 border-[var(--card-divider)] text-[var(--card-text-dark)] font-semibold text-sm rounded-xl hover:bg-[var(--card-divider)]/20 transition-colors"
-            >
-              Go to ballot
-            </button>
+              Make my picks
+            </Link>
           </div>
         </section>
       </main>

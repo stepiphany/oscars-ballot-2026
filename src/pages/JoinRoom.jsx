@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api, getCurrentParticipant } from '../lib/api';
+import { LinkIcon, CheckIcon } from '../components/Icons';
 
 const BG_STYLE = {
   backgroundImage: 'url(/onboard-bg.png), linear-gradient(180deg, #87CEEB 0%, #B0D4E8 35%, #6B7B8C 70%, #4A4A4A 100%)',
@@ -20,6 +21,26 @@ export default function JoinRoom() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/r/${code}` : '';
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const input = document.createElement('input');
+      input.value = shareUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -124,7 +145,7 @@ export default function JoinRoom() {
               disabled={joining}
               className="w-full py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] disabled:opacity-50 transition-colors"
             >
-              {joining ? 'Joining...' : 'Join & Make Predictions'}
+              {joining ? 'Joining...' : 'Make my picks'}
             </button>
             {getCurrentParticipant(code) && (
               <Link
@@ -135,6 +156,34 @@ export default function JoinRoom() {
               </Link>
             )}
           </form>
+
+          <div className="mt-2 pt-2 border-t border-gray-400">
+            <label htmlFor="share-url" className="block text-[var(--card-text-dark)] text-sm font-medium mb-2">
+              Shareable link
+            </label>
+            <p className="text-[var(--card-text-muted)] text-xs mb-2">
+              Share this link so friends can join and make their predictions.
+            </p>
+            <div className="flex gap-2">
+              <input
+                id="share-url"
+                type="text"
+                value={shareUrl}
+                readOnly
+                className="flex-1 min-w-0 px-4 py-3 bg-white border border-[var(--card-divider)] rounded-xl text-[var(--card-text-dark)] text-sm font-mono"
+                aria-describedby="copy-status"
+              />
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="shrink-0 p-3 bg-white border-2 border-[var(--accent-on-light)] text-[var(--accent-on-light)] rounded-xl hover:bg-[var(--accent-on-light)]/10 transition-colors"
+                id="copy-status"
+                aria-label={copied ? 'Copied' : 'Copy link'}
+              >
+                {copied ? <CheckIcon className="w-5 h-5" /> : <LinkIcon className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
         </section>
       </main>
     </div>

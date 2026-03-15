@@ -14,20 +14,17 @@ const INPUT_CLASS =
 
 export default function CreateRoom() {
   const [roomName, setRoomName] = useState('');
-  const [yourName, setYourName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   async function handleCreate(e) {
     e.preventDefault();
-    if (!yourName.trim()) return;
     setLoading(true);
     setError('');
     try {
       const room = await api.createRoom(roomName.trim());
-      const { participant } = await api.joinRoom(room.code, yourName.trim());
-      navigate(`/r/${room.code}/share`, { state: { room, participant } });
+      navigate(`/r/${room.code}`, { state: { room } });
     } catch (err) {
       setError(err.message || 'Failed to create room');
     } finally {
@@ -64,22 +61,6 @@ export default function CreateRoom() {
               />
             </div>
 
-            <div>
-              <label htmlFor="your-name" className="block text-[var(--card-text-dark)] text-sm font-medium mb-2">
-                Your name
-              </label>
-              <input
-                id="your-name"
-                type="text"
-                value={yourName}
-                onChange={(e) => setYourName(e.target.value)}
-                placeholder="e.g. Alex"
-                required
-                className={INPUT_CLASS}
-                aria-describedby={error ? 'create-error' : undefined}
-              />
-            </div>
-
             {error && (
               <p id="create-error" className="text-[var(--error)] text-sm" role="alert">
                 {error}
@@ -91,7 +72,7 @@ export default function CreateRoom() {
               disabled={loading}
               className="w-full py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Creating...' : 'Create & Get Link'}
+              {loading ? 'Creating...' : 'Create & get link'}
             </button>
           </form>
         </section>
