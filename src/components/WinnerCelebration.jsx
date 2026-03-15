@@ -16,13 +16,15 @@ function calculateScore(ballot, results) {
   return score;
 }
 
-export default function WinnerCelebration() {
-  const { code } = useParams();
+export default function WinnerCelebration({ code: codeProp }) {
+  const { code: codeFromParams } = useParams();
+  const code = codeProp ?? codeFromParams;
   const [room, setRoom] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [results, setResults] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const confettiCanvasRef = useRef(null);
+  const checkCelebrationRef = useRef(null);
 
   useEffect(() => {
     if (!code) return;
@@ -72,12 +74,19 @@ export default function WinnerCelebration() {
     };
   }, [code]);
 
-  function checkCelebration() {
+  checkCelebrationRef.current = async function checkCelebration(useFreshResults = false) {
     if (!room || !participants.length) return;
-    const resultsCount = Object.keys(results).length;
+    let resultsToUse = results;
+    if (useFreshResults) {
+      const resRaw = api.getResults?.();
+      const res = resRaw?.then ? await resRaw : (resRaw ?? {});
+      resultsToUse = typeof res === 'object' ? res : {};
+      setResults(resultsToUse);
+    }
+    const resultsCount = Object.keys(resultsToUse).length;
     if (resultsCount !== CATEGORIES.length) return;
     const sorted = participants
-      .map((p) => ({ ...p, score: calculateScore(p.ballot || {}, results) }))
+      .map((p) => ({ ...p, score: calculateScore(p.ballot || {}, resultsToUse) }))
       .sort((a, b) => b.score - a.score);
     const ranked = sorted.reduce((acc, p, i) => {
       const rank = i === 0 ? 1 : (p.score === acc[i - 1].score ? acc[i - 1].rank : i + 1);
@@ -86,16 +95,15 @@ export default function WinnerCelebration() {
     if (!ranked[0]) return;
     if (!consumeShowWinnerCelebration()) return;
     setShowPopup(true);
-  }
+  };
 
   useEffect(() => {
-    if (!room || !participants.length) return;
-    const onShowWinner = () => checkCelebration();
+    if (!code) return;
+    const onShowWinner = () => checkCelebrationRef.current?.(true);
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') checkCelebration();
+      if (document.visibilityState === 'visible') checkCelebrationRef.current?.(true);
     };
-    const onStorage = () => checkCelebration();
-    checkCelebration();
+    const onStorage = () => checkCelebrationRef.current?.(true);
     window.addEventListener('showWinnerCelebration', onShowWinner);
     window.addEventListener('visibilitychange', onVisibilityChange);
     window.addEventListener('storage', onStorage);
@@ -104,6 +112,11 @@ export default function WinnerCelebration() {
       window.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('storage', onStorage);
     };
+  }, [code]);
+
+  useEffect(() => {
+    if (!room || !participants.length) return;
+    checkCelebrationRef.current?.(false);
   }, [room, participants, results]);
 
   useEffect(() => {

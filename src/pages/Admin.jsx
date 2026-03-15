@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, CATEGORIES, setShowWinnerCelebration } from '../lib/api';
+import { api, CATEGORIES, setShowWinnerCelebration, getLastRoomCode } from '../lib/api';
 import { EditIcon } from '../components/Icons';
+import WinnerCelebration from '../components/WinnerCelebration';
 
 export default function Admin() {
   const { code } = useParams();
@@ -241,6 +242,7 @@ export default function Admin() {
           })()}
         </div>
       </main>
+      {!code && <WinnerCelebration code={getLastRoomCode()} />}
     </div>
   );
 }
