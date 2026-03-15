@@ -215,7 +215,7 @@ export default function BallotOnboard() {
               {cat.name}
             </h2>
             <p className="mt-1 text-sm text-[var(--card-text-muted)] font-normal">
-              Pick your prediction for this category
+              Pick your winner for this category
             </p>
           </div>
           <div className="divide-y divide-[var(--card-divider)] pb-6" role="radiogroup" aria-labelledby={`onboard-cat-${cat.id}`}>
@@ -244,7 +244,11 @@ export default function BallotOnboard() {
         </section>
         </div>
 
-        <div className="mt-8 flex items-center justify-between gap-4 w-full max-w-md">
+        <p className="mt-4 text-white/70 text-sm text-center w-full max-w-md">
+          Swipe left to skip this category
+        </p>
+
+        <div className="mt-6 flex items-center justify-between w-full max-w-md">
           <button
             type="button"
             onClick={handleBack}
@@ -254,10 +258,7 @@ export default function BallotOnboard() {
             <BackArrowIcon className="w-4 h-4" />
             Back
           </button>
-          <span className="text-white/70 text-sm shrink-0">
-            Swipe left to skip
-          </span>
-          {isLast && hasSelection && (
+          {isLast && hasSelection ? (
             <button
               type="button"
               onClick={handleFinish}
@@ -265,6 +266,15 @@ export default function BallotOnboard() {
               className="shrink-0 px-5 py-2.5 rounded-xl bg-white text-[var(--card-text-dark)] text-sm font-semibold hover:bg-white/95 disabled:opacity-50 shadow-lg"
             >
               {finishing ? 'Finishing...' : 'Finish'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleFinish()}
+              disabled={finishing}
+              className="text-white/90 text-sm font-medium hover:text-white hover:underline disabled:opacity-50 shrink-0 whitespace-nowrap"
+            >
+              Skip all and go to ballot
             </button>
           )}
         </div>
