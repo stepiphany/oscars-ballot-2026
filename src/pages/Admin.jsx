@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, CATEGORIES } from '../lib/api';
+import { api, CATEGORIES, setShowWinnerCelebration } from '../lib/api';
 import { EditIcon } from '../components/Icons';
 
 export default function Admin() {
@@ -8,11 +8,19 @@ export default function Admin() {
   const [results, setResults] = useState({});
   const [selected, setSelected] = useState({});
   const [saving, setSaving] = useState(null);
+  const [autosaving, setAutosaving] = useState(null);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const autosaveTimerRef = useRef(null);
 
   useEffect(() => {
     loadResults();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
   }, []);
 
   async function loadResults() {
@@ -22,6 +30,10 @@ export default function Admin() {
   }
 
   async function saveCategoryAndCollapse(cat) {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
     setSaving(true);
     try {
       const winnerId = selected[cat.id] ?? results[cat.id]?.winnerId ?? null;
@@ -38,6 +50,37 @@ export default function Admin() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function autosaveCategory(cat, winnerId) {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    setAutosaving(cat.id);
+    try {
+      await api.setResult(cat.id, winnerId);
+      const announcedAt = new Date().toISOString();
+      setResults((prev) => ({
+        ...prev,
+        [cat.id]: { winnerId, announcedAt },
+      }));
+      setSelected((prev) => ({ ...prev, [cat.id]: undefined }));
+      setExpandedCategory(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAutosaving(null);
+    }
+  }
+
+  function handleSelectWinner(cat, nomineeId) {
+    setSelected((prev) => ({ ...prev, [cat.id]: nomineeId }));
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => {
+      autosaveTimerRef.current = null;
+      autosaveCategory(cat, nomineeId);
+    }, 500);
   }
 
   async function clearAll() {
@@ -72,6 +115,20 @@ export default function Admin() {
               Clear all saved
             </button>
           )}
+          <button
+            type="button"
+            disabled={!CATEGORIES.every((cat) => {
+              const winnerId = results[cat.id]?.winnerId;
+              return winnerId && typeof winnerId === 'string' && winnerId.length > 0;
+            })}
+            onClick={() => {
+              setShowWinnerCelebration();
+              window.dispatchEvent(new CustomEvent('showWinnerCelebration'));
+            }}
+            className="mt-2 px-4 py-2.5 rounded-xl bg-amber-400 text-amber-950 font-semibold hover:bg-amber-300 transition-colors disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+          >
+            and the winning ballot goes to...
+          </button>
         </div>
 
         <input
@@ -146,10 +203,10 @@ export default function Admin() {
                   <button
                     type="button"
                     onClick={() => saveCategoryAndCollapse(cat)}
-                    disabled={saving || !currentValue}
+                    disabled={saving || autosaving === cat.id || !currentValue}
                     className="shrink-0 px-4 py-2 rounded-lg bg-[var(--btn-bg)] text-white text-sm font-semibold hover:bg-[var(--btn-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {saving ? 'Saving...' : winner ? 'Update Winner' : 'Save Winner'}
+                    {saving ? 'Saving...' : autosaving === cat.id ? 'Saving...' : winner ? 'Update Winner' : 'Save Winner'}
                   </button>
                 </div>
                   <div className="divide-y divide-[var(--card-divider)]" role="radiogroup" aria-labelledby={`admin-cat-${cat.id}`}>
@@ -167,9 +224,7 @@ export default function Admin() {
                           name={cat.id}
                           value={nom.id}
                           checked={currentValue === nom.id}
-                          onChange={() =>
-                            setSelected((prev) => ({ ...prev, [cat.id]: nom.id }))
-                          }
+                          onChange={() => handleSelectWinner(cat, nom.id)}
                           className="radio-custom"
                         />
                         <span className="text-xs font-medium text-[var(--card-text-dark)]">

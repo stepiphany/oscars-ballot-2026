@@ -332,4 +332,22 @@ export const supabaseApi = {
 
 export const api = hasSupabase() ? supabaseApi : localApi;
 
+const WINNER_CELEBRATION_KEY = `${STORAGE_KEY}-show-winner-celebration`;
+
+export function setShowWinnerCelebration() {
+  try {
+    localStorage.setItem(WINNER_CELEBRATION_KEY, '1');
+  } catch {}
+}
+
+export function consumeShowWinnerCelebration() {
+  try {
+    const val = localStorage.getItem(WINNER_CELEBRATION_KEY);
+    localStorage.removeItem(WINNER_CELEBRATION_KEY);
+    return val === '1';
+  } catch {
+    return false;
+  }
+}
+
 export { CATEGORIES, CEREMONY_START };

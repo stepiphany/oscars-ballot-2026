@@ -1,5 +1,6 @@
 import { Outlet, useParams, useLocation, NavLink } from 'react-router-dom';
 import { ParticipantProvider } from '../context/ParticipantContext';
+import WinnerCelebration from './WinnerCelebration';
 
 const TAB_BG_STYLE = {
   backgroundImage: 'url(/onboard-bg.png), linear-gradient(180deg, #87CEEB 0%, #B0D4E8 35%, #6B7B8C 70%, #4A4A4A 100%)',
@@ -79,6 +80,7 @@ export default function RoomLayout() {
         <div className="relative min-h-screen">
           <Outlet />
           <RoomNav />
+          <WinnerCelebration />
         </div>
       </div>
     </ParticipantProvider>

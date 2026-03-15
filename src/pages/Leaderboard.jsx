@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import confetti from 'canvas-confetti';
 import { api, CATEGORIES, getCurrentParticipant } from '../lib/api';
 import { RemoveIcon } from '../components/Icons';
 
@@ -37,8 +36,6 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState(null);
   const [confirmRemove, setConfirmRemove] = useState(null);
-  const [showWinnerPopup, setShowWinnerPopup] = useState(false);
-  const hasShownWinner = useRef(false);
 
   async function handleRemove(p) {
     if (!api.removeParticipant) return;
@@ -90,10 +87,6 @@ export default function Leaderboard() {
   }, [code, isPreview]);
 
   useEffect(() => {
-    hasShownWinner.current = false;
-  }, [code]);
-
-  useEffect(() => {
     if (!api.subscribeParticipants && !api.subscribeResults) return;
     let sub1, sub2;
     (async () => {
@@ -109,25 +102,6 @@ export default function Leaderboard() {
       sub2?.unsubscribe?.();
     };
   }, [code]);
-
-  useEffect(() => {
-    if (!room || hasShownWinner.current) return;
-    const resultsCount = Object.keys(results).length;
-    if (resultsCount !== CATEGORIES.length) return;
-    const sorted = participants
-      .map((p) => ({ ...p, score: calculateScore(p.ballot || {}, results) }))
-      .sort((a, b) => b.score - a.score);
-    const ranked = sorted.reduce((acc, p, i) => {
-      const rank = i === 0 ? 1 : (p.score === acc[i - 1].score ? acc[i - 1].rank : i + 1);
-      return [...acc, { ...p, rank }];
-    }, []);
-    const firstPlace = ranked[0];
-    if (!firstPlace) return;
-    hasShownWinner.current = true;
-    setShowWinnerPopup(true);
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    setTimeout(() => confetti({ particleCount: 50, spread: 100, origin: { y: 0.5 } }), 250);
-  }, [room, participants, results]);
 
   if (loading) {
     return (
@@ -217,31 +191,6 @@ export default function Leaderboard() {
           </p>
         )}
       </main>
-
-      {showWinnerPopup && ranked.length > 0 && (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="winner-title"
-        >
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
-            <p id="winner-title" className="text-[var(--card-text-muted)] text-sm font-medium uppercase tracking-wider mb-2">
-              Winner
-            </p>
-            <h3 className="text-2xl font-bold text-[var(--card-text-dark)] mb-6">
-              {ranked[0].displayName}
-            </h3>
-            <button
-              type="button"
-              onClick={() => setShowWinnerPopup(false)}
-              className="w-full px-4 py-3 rounded-xl bg-[var(--btn-bg)] text-white font-semibold hover:bg-[var(--btn-hover)] transition-colors"
-            >
-              Celebrate
-            </button>
-          </div>
-        </div>
-      )}
 
       {confirmRemove && (
         <div
