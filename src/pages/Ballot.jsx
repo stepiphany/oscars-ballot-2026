@@ -23,6 +23,9 @@ export default function Ballot() {
   const [shareCopied, setShareCopied] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState('');
   const ballotRef = useRef(ballot);
   ballotRef.current = ballot;
 
@@ -129,6 +132,41 @@ export default function Ballot() {
     setBallot({});
   }
 
+  function handleExportBallot() {
+    const data = {
+      roomCode: code,
+      displayName: participant.displayName,
+      ballot,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `oscars-ballot-backup-${code}-${participant.displayName.replace(/\s+/g, '-')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImportBallot() {
+    setImportError('');
+    try {
+      const data = JSON.parse(importText);
+      const imported = data.ballot;
+      if (!imported || typeof imported !== 'object') {
+        setImportError('Invalid backup: no ballot data found');
+        return;
+      }
+      const merged = { ...ballot, ...imported };
+      setBallot(merged);
+      setImportOpen(false);
+      setImportText('');
+      handleSave(merged);
+    } catch {
+      setImportError('Invalid backup format. Paste a previously exported ballot file.');
+    }
+  }
+
   const points = CATEGORIES.filter(
     (cat) => results[cat.id]?.winnerId && ballot[cat.id] === results[cat.id].winnerId
   ).length;
@@ -192,6 +230,24 @@ export default function Ballot() {
             >
               {shareCopied ? <CheckIcon /> : <LinkIcon />}
             </button>
+            <span className="inline-flex items-center gap-x-4 shrink-0">
+              <button
+                type="button"
+                onClick={handleExportBallot}
+                disabled={isLocked}
+                className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+              >
+                Export ballot
+              </button>
+              <button
+                type="button"
+                onClick={() => { setImportOpen(true); setImportError(''); setImportText(''); }}
+                disabled={isLocked}
+                className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+              >
+                Import ballot
+              </button>
+            </span>
             {!isLocked && Object.keys(ballot).length > 0 && (
               <button
                 type="button"
@@ -212,6 +268,52 @@ export default function Ballot() {
             )}
           </div>
         </div>
+
+        {importOpen && (
+          <div
+            className="fixed inset-0 z-30 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="import-title"
+          >
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full max-h-[80vh] flex flex-col">
+              <h3 id="import-title" className="text-lg font-bold text-[var(--card-text-dark)] mb-2">
+                Restore from backup
+              </h3>
+              <p className="text-[var(--card-text-muted)] text-sm mb-4">
+                Paste the contents of a previously exported ballot file below.
+              </p>
+              <textarea
+                value={importText}
+                onChange={(e) => { setImportText(e.target.value); setImportError(''); }}
+                placeholder='{"roomCode":"...","ballot":{...},...}'
+                className="flex-1 min-h-[120px] w-full px-4 py-3 border border-[var(--card-divider)] rounded-xl text-[var(--card-text-dark)] text-sm font-mono resize-none"
+                aria-describedby={importError ? 'import-error' : undefined}
+              />
+              {importError && (
+                <p id="import-error" className="text-[var(--error)] text-sm mt-2" role="alert">
+                  {importError}
+                </p>
+              )}
+              <div className="flex gap-3 justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={() => { setImportOpen(false); setImportText(''); setImportError(''); }}
+                  className="px-4 py-2.5 rounded-xl text-[var(--card-text-dark)] font-medium hover:bg-[var(--card-divider)]/30 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImportBallot}
+                  className="px-4 py-2.5 rounded-xl bg-[var(--btn-bg)] text-white font-semibold hover:bg-[var(--btn-hover)] transition-colors"
+                >
+                  Restore
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLocked && (
           <div
