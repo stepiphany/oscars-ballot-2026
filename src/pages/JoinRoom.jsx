@@ -88,7 +88,7 @@ export default function JoinRoom() {
       <div className="absolute inset-0 z-0 bg-black/35" aria-hidden />
 
       <main className="flex-1 flex flex-col justify-center px-6 pb-16 max-w-lg mx-auto w-full relative z-10">
-        <section className="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
+        <section className="bg-white/85 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8">
           <h2 className="text-2xl font-bold text-[var(--card-text-dark)] leading-tight tracking-tight mb-2">
             Join {room.name}
           </h2>

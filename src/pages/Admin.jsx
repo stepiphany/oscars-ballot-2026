@@ -107,7 +107,7 @@ export default function Admin() {
             return (
               <section
                 key={cat.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg"
+                className="bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg"
                 aria-labelledby={`admin-cat-${cat.id}`}
               >
                 {showCollapsed ? (

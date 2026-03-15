@@ -126,7 +126,7 @@ export default function Leaderboard() {
           {ranked.map((p, i) => (
             <li
               key={p.id}
-              className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-lg"
+              className="flex items-center gap-4 p-4 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg"
             >
               <span
                 className="w-10 h-10 flex items-center justify-center font-bold text-sm rounded-xl shrink-0 bg-transparent border border-[var(--card-divider)] text-[var(--card-text-dark)]"

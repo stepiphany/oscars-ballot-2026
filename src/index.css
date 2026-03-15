@@ -95,12 +95,12 @@ button, a, [role="button"] {
 }
 
 .radio-custom:hover:not(:disabled) {
-  border-color: var(--card-text-muted);
+  border-color: var(--oscars-gold);
 }
 
 .radio-custom:checked {
   border-color: var(--btn-bg);
-  background: var(--btn-bg);
+  background: color-mix(in srgb, var(--btn-bg) 85%, transparent);
 }
 
 .radio-custom:focus {

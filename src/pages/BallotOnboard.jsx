@@ -202,7 +202,7 @@ export default function BallotOnboard() {
           onMouseDown={(e) => handlePointerStart(e.clientX)}
         >
         <section
-          className="w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+          className="w-full bg-white/85 backdrop-blur-sm rounded-3xl overflow-hidden shadow-2xl"
           style={{
             transform: `translateX(${dragX}px) rotate(${dragX * ROTATION_FACTOR}deg) scale(${Math.max(0.9, 1 - Math.abs(dragX) / 1200)})`,
             opacity: Math.max(0.85, 1 - Math.abs(dragX) / 800),

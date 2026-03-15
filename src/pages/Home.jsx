@@ -20,7 +20,7 @@ export default function Home() {
           <h2 className="text-white text-lg font-semibold">2026 Academy Awards</h2>
           <p className="text-white/80 text-sm mt-1">Sunday, March 15, 2026 · 7:00 PM ET</p>
         </div>
-        <section className="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
+        <section className="bg-white/85 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8">
           <h1 className="text-2xl font-bold text-[var(--card-text-dark)] leading-tight tracking-tight mb-2">
             Make Your Predictions
           </h1>

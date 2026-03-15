@@ -160,7 +160,7 @@ export default function Ballot() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <main className="flex-1 min-h-0 overflow-y-auto px-6 py-6 pb-20 max-w-lg mx-auto w-full">
-        <div className="mb-6 bg-white rounded-2xl shadow-lg p-4">
+        <div className="mb-6 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg p-4">
           <h2 className="text-lg font-bold text-[var(--card-text-dark)] mb-1">
             {participant.displayName}&apos;s ballot
           </h2>
@@ -215,7 +215,7 @@ export default function Ballot() {
 
         {isLocked && (
           <div
-            className="mb-6 p-4 bg-white/95 rounded-2xl shadow-lg text-[var(--card-text-dark)] text-sm"
+            className="mb-6 p-4 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg text-[var(--card-text-dark)] text-sm"
             role="status"
           >
             Ballots are locked. The ceremony has started.
@@ -252,7 +252,7 @@ export default function Ballot() {
               return (
                 <section
                   key={cat.id}
-                  className={`bg-white rounded-2xl overflow-hidden shadow-lg px-5 py-4 flex items-center justify-between gap-4 ${
+                  className={`bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg px-5 py-4 flex items-center justify-between gap-4 ${
                     !isLocked ? 'cursor-pointer hover:bg-[var(--card-divider)]/10 transition-colors' : ''
                   }`}
                   aria-labelledby={`cat-${cat.id}`}
@@ -324,7 +324,7 @@ export default function Ballot() {
             return (
               <section
                 key={cat.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg"
+                className="bg-white/85 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg"
                 aria-labelledby={`cat-${cat.id}`}
               >
                 <div className="px-5 py-4 flex items-center justify-between gap-4 border-b border-[var(--card-divider)]">
