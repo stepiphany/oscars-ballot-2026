@@ -186,7 +186,7 @@ export default function Ballot() {
     if (!date) return '';
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return 'Just now';
+    if (diff < 60) return 'just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   }
@@ -198,56 +198,50 @@ export default function Ballot() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <main className="flex-1 min-h-0 overflow-y-auto px-6 py-6 pb-20 max-w-lg mx-auto w-full">
-        <div className="mb-6 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg p-4">
-          <h2 className="text-lg font-bold text-[var(--card-text-dark)] mb-1">
-            {participant.displayName}&apos;s ballot
+        <div className="flex items-center gap-2 p-4 mb-2 rounded-xl">
+          <h2 className="text-2xl font-bold text-white">
+            {room.name}
           </h2>
-          <p className="text-[var(--card-text-muted)] text-sm mb-4">
+          <button
+            type="button"
+            onClick={handleCopyShare}
+            className="p-2 -m-2 text-white/80 hover:text-white transition-colors"
+            aria-label={shareCopied ? 'Link copied' : 'Copy share link'}
+          >
+            {shareCopied ? <CheckIcon /> : <LinkIcon />}
+          </button>
+        </div>
+        <div className="mb-6 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg p-4 flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 min-w-0">
+            <h3 className="text-lg font-bold text-[var(--card-text-dark)] truncate min-w-0">
+              {participant.displayName}&apos;s ballot
+            </h3>
+            {!isLocked && (autosaving || loading || lastAutosaveTime || saved) && (
+              <span className="text-[var(--card-text-muted)] text-sm shrink-0 whitespace-nowrap">
+                {autosaving ? 'Autosaving...' : loading ? 'Saving...' : lastAutosaveTime ? `Autosaved ${formatLastSaved(lastAutosaveTime)}` : 'Saved'}
+              </span>
+            )}
+          </div>
+          <p className="text-[var(--card-text-muted)] text-sm">
             Points earned: <span className="font-semibold tabular-nums text-[var(--card-text-dark)]">{points}/{totalCategories}</span>
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {!isLocked && (
-              <>
-                <button
-                  onClick={handleSave}
-                  disabled={loading || autosaving}
-                  className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] disabled:opacity-50"
-                >
-                  {saved ? 'Saved' : autosaving ? 'Autosaving...' : loading ? 'Saving...' : 'Save Ballot'}
-                </button>
-                {lastAutosaveTime && !autosaving && !loading && (
-                  <span className="text-[var(--card-text-muted)] text-xs">
-                    Autosaved {formatLastSaved(lastAutosaveTime)}
-                  </span>
-                )}
-              </>
-            )}
+          <div className="flex flex-wrap items-center gap-4">
             <button
               type="button"
-              onClick={handleCopyShare}
-              className="text-[var(--accent-on-light)] p-2 -m-2 hover:text-[var(--accent)]"
-              aria-label={shareCopied ? 'Link copied' : 'Copy share link'}
+              onClick={handleExportBallot}
+              disabled={isLocked}
+              className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
             >
-              {shareCopied ? <CheckIcon /> : <LinkIcon />}
+              Export ballot
             </button>
-            <span className="inline-flex items-center gap-x-4 shrink-0">
-              <button
-                type="button"
-                onClick={handleExportBallot}
-                disabled={isLocked}
-                className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
-              >
-                Export ballot
-              </button>
-              <button
-                type="button"
-                onClick={() => { setImportOpen(true); setImportError(''); setImportText(''); }}
-                disabled={isLocked}
-                className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
-              >
-                Import ballot
-              </button>
-            </span>
+            <button
+              type="button"
+              onClick={() => { setImportOpen(true); setImportError(''); setImportText(''); }}
+              disabled={isLocked}
+              className="text-[var(--accent-on-light)] text-sm font-medium hover:text-[var(--accent)] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+            >
+              Import ballot
+            </button>
             {!isLocked && Object.keys(ballot).length > 0 && (
               <button
                 type="button"
