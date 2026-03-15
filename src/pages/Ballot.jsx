@@ -291,7 +291,7 @@ export default function Ballot() {
                     ) : (
                       <>
                         {userPickNom && (
-                          <p className="text-[var(--card-text-muted)] text-xs font-medium uppercase tracking-wider mt-1">
+                          <p className="text-xs font-medium uppercase tracking-wider mt-1" style={{ color: 'var(--oscars-gold)' }}>
                             Your pick
                           </p>
                         )}
