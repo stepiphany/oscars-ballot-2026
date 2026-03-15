@@ -94,12 +94,15 @@ export default function Admin() {
                 )
               : CATEGORIES;
             return filtered.map((cat) => {
-            const winner = results[cat.id];
+            const savedWinnerId = results[cat.id]?.winnerId;
+            const hasSavedWinner = savedWinnerId && typeof savedWinnerId === 'string' && savedWinnerId.length > 0;
+            const winner = hasSavedWinner ? results[cat.id] : null;
             const winnerNom = winner
               ? cat.nominees.find((n) => n.id === winner.winnerId)
               : null;
             const isExpanded = expandedCategory === cat.id;
             const showCollapsed = winner && !isExpanded;
+            const currentValue = (selected[cat.id] ?? (hasSavedWinner ? savedWinnerId : null)) || null;
 
             return (
               <section
@@ -143,7 +146,7 @@ export default function Admin() {
                   <button
                     type="button"
                     onClick={() => saveCategoryAndCollapse(cat)}
-                    disabled={saving || !(selected[cat.id] ?? results[cat.id]?.winnerId)}
+                    disabled={saving || !currentValue}
                     className="shrink-0 px-4 py-2 rounded-lg bg-[var(--btn-bg)] text-white text-sm font-semibold hover:bg-[var(--btn-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {saving ? 'Saving...' : winner ? 'Update Winner' : 'Save Winner'}
@@ -154,7 +157,7 @@ export default function Admin() {
                       <label
                         key={nom.id}
                         className={`flex items-center gap-3 px-5 py-4 cursor-pointer transition-colors ${
-                          (selected[cat.id] ?? results[cat.id]?.winnerId) === nom.id
+                          currentValue === nom.id
                             ? 'bg-[var(--card-divider)]/30'
                             : 'hover:bg-[var(--card-divider)]/20'
                         }`}
@@ -163,7 +166,7 @@ export default function Admin() {
                           type="radio"
                           name={cat.id}
                           value={nom.id}
-                          checked={(selected[cat.id] ?? results[cat.id]?.winnerId) === nom.id}
+                          checked={currentValue === nom.id}
                           onChange={() =>
                             setSelected((prev) => ({ ...prev, [cat.id]: nom.id }))
                           }

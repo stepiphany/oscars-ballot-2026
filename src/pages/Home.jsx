@@ -25,13 +25,13 @@ export default function Home() {
             Make Your Predictions
           </h1>
           <p className="text-[var(--card-text-muted)] text-sm mb-6">
-            Create a ballot and share with your watch party. Track results in real time as awards are announced.
+            Create a room and share with your watch party. Track results in real time as awards are announced.
           </p>
           <Link
             to="/create"
             className="inline-block py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] transition-colors w-fit"
           >
-            Create Ballot
+            Create room
           </Link>
         </section>
       </main>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api, CATEGORIES, saveCurrentParticipant, getCurrentParticipant, saveLastRoomCode } from '../lib/api';
+import { BackArrowIcon } from '../components/Icons';
 import { useParticipant } from '../context/ParticipantContext';
 
 const SWIPE_THRESHOLD = 80;
@@ -248,18 +249,14 @@ export default function BallotOnboard() {
             type="button"
             onClick={handleBack}
             disabled={isFirst || finishing}
-            className="text-white text-sm font-medium hover:text-white/90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-2 text-white text-sm font-medium hover:text-white/90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
+            <BackArrowIcon className="w-4 h-4" />
             Back
           </button>
-          <button
-            type="button"
-            onClick={handleSkip}
-            disabled={finishing}
-            className="text-white text-sm font-medium hover:text-white/90 disabled:opacity-50 shrink-0"
-          >
-            {isLast ? 'Skip & Finish' : 'Skip'}
-          </button>
+          <span className="text-white/70 text-sm shrink-0">
+            Swipe left to skip
+          </span>
           {isLast && hasSelection && (
             <button
               type="button"
