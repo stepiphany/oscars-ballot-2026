@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, getCurrentParticipant } from '../lib/api';
 
 const BG_STYLE = {
   backgroundImage: 'url(/onboard-bg.png), linear-gradient(180deg, #87CEEB 0%, #B0D4E8 35%, #6B7B8C 70%, #4A4A4A 100%)',
@@ -126,6 +126,14 @@ export default function JoinRoom() {
             >
               {joining ? 'Joining...' : 'Join & Make Predictions'}
             </button>
+            {getCurrentParticipant(code) && (
+              <Link
+                to={`/r/${code}/ballot`}
+                className="block mt-3 text-center text-[var(--accent-on-light)] font-medium hover:text-[var(--accent)] text-sm"
+              >
+                Return to my ballot
+              </Link>
+            )}
           </form>
         </section>
       </main>

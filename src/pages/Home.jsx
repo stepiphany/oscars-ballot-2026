@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getLastRoomCode } from '../lib/api';
 
 const BG_STYLE = {
   backgroundImage: 'url(/onboard-bg.png), linear-gradient(180deg, #87CEEB 0%, #B0D4E8 35%, #6B7B8C 70%, #4A4A4A 100%)',
@@ -8,6 +9,7 @@ const BG_STYLE = {
 };
 
 export default function Home() {
+  const lastRoom = getLastRoomCode();
   return (
     <div
       className="min-h-screen flex flex-col relative"
@@ -27,12 +29,22 @@ export default function Home() {
           <p className="text-[var(--card-text-muted)] text-sm mb-6">
             Create a room and share with your watch party. Track results in real time as awards are announced.
           </p>
-          <Link
-            to="/create"
-            className="inline-block py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] transition-colors w-fit"
-          >
-            Create room
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              to="/create"
+              className="inline-block py-3 px-6 bg-[var(--btn-bg)] text-white font-semibold text-sm rounded-xl hover:bg-[var(--btn-hover)] transition-colors w-fit"
+            >
+              Create room
+            </Link>
+            {lastRoom && (
+              <Link
+                to={`/r/${lastRoom}/ballot`}
+                className="inline-flex items-center py-3 text-[var(--accent-on-light)] font-medium hover:text-[var(--accent)] text-sm"
+              >
+                Return to my ballot
+              </Link>
+            )}
+          </div>
         </section>
       </main>
     </div>
